@@ -8,7 +8,11 @@ float4x4 _CameraInverseProjection;
 float4 _DirectionalLight;
 
 float2 _PixelOffset;
-
+float2 _PixelOffset1;
+float2 _PixelOffset2;
+float2 _PixelOffset3;
+float2 _PixelOffset4;
+float2 _PixelOffset5;
 Texture2D<float4> _SkyboxTexture;
 SamplerState sampler_SkyboxTexture;
 
@@ -127,17 +131,17 @@ void IntersectSphere(Ray ray, inout RayHit bestHit, uint sphereIndex)
 
 RayHit Trace(Ray ray)
 {
-	RayHit bestHit = CreateRayHit();
+	RayHit hit = CreateRayHit();
 
 	// Trace ground plane
-	IntersectGroundPlane(ray, bestHit);
+	IntersectGroundPlane(ray, hit);
 
 	// Trace spheres
 	uint numSpheres, stride;
 	_Spheres.GetDimensions(numSpheres, stride);
 	for (uint i = 0; i < numSpheres; i++)
-		IntersectSphere(ray, bestHit, i);
-	return bestHit;
+		IntersectSphere(ray, hit, i);
+	return hit;
 }
 
 
@@ -196,7 +200,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
 	// Trace and shade the ray
 	float3 result = float3(0, 0, 0);
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		RayHit hit = Trace(ray);
 		result += ray.energy * Shade(ray, hit);
@@ -205,5 +209,87 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 			break;
 	}
 
+
+	float2 uv1 = float2((id.xy + _PixelOffset1) / float2(width, height) * 2.0f - 1.0f);
+
+	// Get a ray for the UVs
+	Ray ray1 = CreateCameraRay(uv1);
+
+	// Trace and shade the ray
+	float3 result1 = float3(0, 0, 0);
+	for (int i = 0; i < 10; i++)
+	{
+		RayHit hit = Trace(ray1);
+		result1 += ray1.energy * Shade(ray1, hit);
+
+		if (!any(ray1.energy))
+			break;
+	}
+
+	float2 uv2 = float2((id.xy + _PixelOffset2) / float2(width, height) * 2.0f - 1.0f);
+
+	// Get a ray for the UVs
+	Ray ray2 = CreateCameraRay(uv1);
+
+	// Trace and shade the ray
+	float3 result2 = float3(0, 0, 0);
+	for (int i = 0; i < 10; i++)
+	{
+		RayHit hit = Trace(ray2);
+		result2 += ray2.energy * Shade(ray2, hit);
+
+		if (!any(ray2.energy))
+			break;
+	}
+
+	float2 uv3 = float2((id.xy + _PixelOffset3) / float2(width, height) * 2.0f - 1.0f);
+
+	// Get a ray for the UVs
+	Ray ray3 = CreateCameraRay(uv3);
+
+	// Trace and shade the ray
+	float3 result3 = float3(0, 0, 0);
+	for (int i = 0; i < 10; i++)
+	{
+		RayHit hit = Trace(ray3);
+		result3 += ray3.energy * Shade(ray3, hit);
+
+		if (!any(ray3.energy))
+			break;
+	}
+
+	float2 uv4 = float2((id.xy + _PixelOffset4) / float2(width, height) * 2.0f - 1.0f);
+
+	// Get a ray for the UVs
+	Ray ray4 = CreateCameraRay(uv4);
+
+	// Trace and shade the ray
+	float3 result4 = float3(0, 0, 0);
+	for (int i = 0; i < 10; i++)
+	{
+		RayHit hit = Trace(ray4);
+		result4 += ray4.energy * Shade(ray4, hit);
+
+		if (!any(ray4.energy))
+			break;
+	}
+
+	float2 uv5 = float2((id.xy + _PixelOffset5) / float2(width, height) * 2.0f - 1.0f);
+
+	// Get a ray for the UVs
+	Ray ray5 = CreateCameraRay(uv5);
+
+	// Trace and shade the ray
+	float3 result5 = float3(0, 0, 0);
+	for (int i = 0; i < 10; i++)
+	{
+		RayHit hit = Trace(ray5);
+		result5 += ray5.energy * Shade(ray5, hit);
+
+		if (!any(ray5.energy))
+			break;
+	}
+	result += result1 + result2 + result3 + result4 + result5;
+	result = result / 6.0f;
 	Result[id.xy] = float4(result, 1);
 }
